@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "my-app",
-    "slug": "my-app",
+    "slug": "masrafapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -55,8 +55,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "3c94621a-a7c3-4e5f-9829-3012e927d958"
+        "projectId": "b391a078-c594-44d6-b7e5-28ab28297a11"
       }
-    }
+    },
+    "owner": "mertvural"
   }
 }
