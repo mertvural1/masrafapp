@@ -13,29 +13,10 @@ import {
   TextInput,
   View
 } from "react-native";
+import { EXPENSES_PATH_SUFFIX, FIREBASE_ROOM_PATH } from "../../constants/room";
+import type { ExpenseItem } from "../../types/expense";
+import type { HeaderContentProps } from "../../types/header";
 import { database } from "../firebase";
-
-interface ExpenseItem {
-  id: string;
-  name: string;
-  description: string;
-  amount: number;
-  createdAt: string;
-}
-
-interface HeaderContentProps {
-  roomKey: string;
-  name: string;
-  description: string;
-  amount: string;
-  total: number;
-  loading: boolean;
-  expenseCount: number;
-  onNameChange: (value: string) => void;
-  onDescriptionChange: (value: string) => void;
-  onAmountChange: (value: string) => void;
-  onAddExpense: () => void;
-}
 
 const HeaderContent = memo(function HeaderContent({
   roomKey,
@@ -120,7 +101,7 @@ export default function RoomScreen() {
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const roomPath = key ? `rooms/${key}/expenses` : null;
+  const roomPath = key ? `${FIREBASE_ROOM_PATH}/${key}/${EXPENSES_PATH_SUFFIX}` : null;
   const roomRef = roomPath ? ref(database, roomPath) : null;
 
   const loadExpenses = useCallback(() => {

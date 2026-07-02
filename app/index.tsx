@@ -2,16 +2,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    Button,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Button,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
-
-const ROOM_CACHE_KEY = "shared-room:lastKey";
+import { ROOM_CACHE_KEY, ROOM_PREFIX } from "../constants/room";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -34,7 +33,7 @@ export default function HomeScreen() {
   };
 
   const handleNewRoom = async () => {
-    const newKey = `oda-${Math.random().toString(36).substring(2, 8)}`;
+    const newKey = `${ROOM_PREFIX}${Math.random().toString(36).substring(2, 8)}`;
     await saveRoomKey(newKey);
     router.push(`/room/${newKey}`);
   };
