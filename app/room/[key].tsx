@@ -1,15 +1,17 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { child, onValue, ref, remove, set } from "firebase/database";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
-    Alert,
-    Button,
-    FlatList,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View
+  Alert,
+  Button,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
 } from "react-native";
 import { database } from "../firebase";
 
@@ -20,6 +22,94 @@ interface ExpenseItem {
   amount: number;
   createdAt: string;
 }
+
+interface HeaderContentProps {
+  roomKey: string;
+  name: string;
+  description: string;
+  amount: string;
+  total: number;
+  loading: boolean;
+  expenseCount: number;
+  onNameChange: (value: string) => void;
+  onDescriptionChange: (value: string) => void;
+  onAmountChange: (value: string) => void;
+  onAddExpense: () => void;
+}
+
+const HeaderContent = memo(function HeaderContent({
+  roomKey,
+  name,
+  description,
+  amount,
+  total,
+  loading,
+  expenseCount,
+  onNameChange,
+  onDescriptionChange,
+  onAmountChange,
+  onAddExpense,
+}: HeaderContentProps) {
+  return (
+    <>
+      <View style={styles.header}>
+        <Text style={styles.title}>Oda: {roomKey}</Text>
+        <Text style={styles.subtitle}>
+          Bu anahtarı alan herkes aynı masraf listesini görür.
+        </Text>
+      </View>
+
+      <View style={styles.formCard}>
+        <Text style={styles.label}>Masrafı Yapan</Text>
+        <TextInput
+          value={name}
+          onChangeText={onNameChange}
+          placeholder="Mert, Ali, Veli"
+          style={styles.input}
+          returnKeyType="next"
+          blurOnSubmit={false}
+        />
+
+        <Text style={styles.label}>Masraf Adı</Text>
+        <TextInput
+          value={description}
+          onChangeText={onDescriptionChange}
+          placeholder="Elektrik faturası"
+          style={styles.input}
+          returnKeyType="next"
+          blurOnSubmit={false}
+        />
+
+        <Text style={styles.label}>Tutar (TL)</Text>
+        <TextInput
+          value={amount}
+          onChangeText={onAmountChange}
+          placeholder="500"
+          keyboardType="numeric"
+          style={styles.input}
+          returnKeyType="done"
+          onSubmitEditing={onAddExpense}
+        />
+
+        <Button title="Masraf Ekle" onPress={onAddExpense} />
+      </View>
+
+      <View style={styles.summaryCard}>
+        <Text style={styles.sectionTitle}>Toplam</Text>
+        <Text style={styles.totalText}>{total.toFixed(2)} TL</Text>
+      </View>
+
+      <View style={styles.listCard}>
+        <Text style={styles.sectionTitle}>Masraflar</Text>
+        {loading ? (
+          <Text>Yükleniyor...</Text>
+        ) : expenseCount === 0 ? (
+          <Text>Henüz masraf yok.</Text>
+        ) : null}
+      </View>
+    </>
+  );
+});
 
 export default function RoomScreen() {
   const { key } = useLocalSearchParams() as { key?: string };
@@ -115,87 +205,55 @@ export default function RoomScreen() {
     );
   }
 
-  const headerComponent = () => (
-    <>
-      <View style={styles.header}>
-        <Text style={styles.title}>Oda: {key}</Text>
-        <Text style={styles.subtitle}>
-          Bu anahtarı alan herkes aynı masraf listesini görür.
-        </Text>
-      </View>
-
-      <View style={styles.formCard}>
-        <Text style={styles.label}>Masrafı Yapan</Text>
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          placeholder="Mert, Ali, Veli"
-          style={styles.input}
-        />
-
-        <Text style={styles.label}>Masraf Adı</Text>
-        <TextInput
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Elektrik faturası"
-          style={styles.input}
-        />
-
-        <Text style={styles.label}>Tutar (TL)</Text>
-        <TextInput
-          value={amount}
-          onChangeText={setAmount}
-          placeholder="500"
-          keyboardType="numeric"
-          style={styles.input}
-        />
-
-        <Button title="Masraf Ekle" onPress={addExpense} />
-      </View>
-
-      <View style={styles.summaryCard}>
-        <Text style={styles.sectionTitle}>Toplam</Text>
-        <Text style={styles.totalText}>{total.toFixed(2)} TL</Text>
-      </View>
-
-      <View style={styles.listCard}>
-        <Text style={styles.sectionTitle}>Masraflar</Text>
-        {loading ? (
-          <Text>Yükleniyor...</Text>
-        ) : expenses.length === 0 ? (
-          <Text>Henüz masraf yok.</Text>
-        ) : null}
-      </View>
-    </>
+  const headerComponent = (
+    <HeaderContent
+      roomKey={key ?? ""}
+      name={name}
+      description={description}
+      amount={amount}
+      total={total}
+      loading={loading}
+      expenseCount={expenses.length}
+      onNameChange={setName}
+      onDescriptionChange={setDescription}
+      onAmountChange={setAmount}
+      onAddExpense={addExpense}
+    />
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        data={expenses}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={headerComponent}
-        ListFooterComponent={
-          <View style={styles.actions}>
-            <Button title="Odayı Temizle" color="#d9534f" onPress={clearRoom} />
-            <View style={styles.backButton}>
-              <Button title="Ana Sayfaya Dön" onPress={() => router.push("/")} />
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoiding}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+      >
+        <FlatList
+          data={expenses}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={headerComponent}
+          ListFooterComponent={
+            <View style={styles.actions}>
+              <Button title="Odayı Temizle" color="#d9534f" onPress={clearRoom} />
+              <View style={styles.backButton}>
+                <Button title="Ana Sayfaya Dön" onPress={() => router.push("/")} />
+              </View>
             </View>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <View style={styles.expenseItem}>
-            <View style={styles.expenseRow}>
-              <Text style={styles.expenseName}>{item.description}</Text>
-              <Text style={styles.expenseAmount}>{item.amount.toFixed(2)} TL</Text>
+          }
+          renderItem={({ item }) => (
+            <View style={styles.expenseItem}>
+              <View style={styles.expenseRow}>
+                <Text style={styles.expenseName}>{item.description}</Text>
+                <Text style={styles.expenseAmount}>{item.amount.toFixed(2)} TL</Text>
+              </View>
+              <Text style={styles.expenseMeta}>{item.name}</Text>
             </View>
-            <Text style={styles.expenseMeta}>{item.name}</Text>
-          </View>
-        )}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-        ListEmptyComponent={!loading ? <Text>Henüz masraf yok.</Text> : null}
-      />
+          )}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          ListEmptyComponent={!loading ? <Text>Henüz masraf yok.</Text> : null}
+        />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -204,6 +262,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f7f7f7",
+  },
+  keyboardAvoiding: {
+    flex: 1,
   },
   content: {
     padding: 20,
