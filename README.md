@@ -1,50 +1,59 @@
-# Welcome to your Expo app 👋
+# MasrafApp
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Bir Expo + React Native (TypeScript) projesi. Hızlı başlangıç için oluşturulmuş, dosya tabanlı yönlendirme kullanan ve Android yapı yapılandırması içeren mobil uygulama şablonu.
 
-## Get started
+**Öne Çıkanlar**
+- **Teknoloji**: Expo, React Native, TypeScript
+- **Yönlendirme**: Dosya tabanlı yönlendirme (app/ dizini)
+- **Platformlar**: Android (yerel yapı dosyaları), iOS (Expo üzerinden)
 
-1. Install dependencies
+**Hızlı Başlangıç**
+- **Bağımlılıkları yükle**:
 
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
+- **Geliştirme sunucusunu başlat**:
 
-2. Start the app
+```bash
+npx expo start
+```
 
-   ```bash
-   npx expo start
-   ```
+Çıktıda Android emülatörü, iOS simülatörü, Expo Go veya development build seçeneklerini göreceksiniz.
 
-In the output, you'll find options to open the app in a
+**Android için (yerel yapı)**
+- Projede Android klasörü ve Gradle yapılandırması mevcuttur. Yerel bir APK veya geliştirme yapısı oluşturmak için Android Studio veya Gradle kullanın.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+**Projeyi sıfırlama**
+- Starter içeriğini taşımak ve boş bir `app` dizini oluşturmak için:
 
 ```bash
 npm run reset-project
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+**Proje Yapısı (kısaca)**
+- **app/**: Uygulama kaynakları ve dosya tabanlı yönlendirme
+- **android/**: Android proje yapılandırması (native kodlar ve Gradle)
+- **assets/**: Görseller ve statik kaynaklar
+- **constants/**, **hooks/**, **types/**: Uygulama mantığı için yardımcı klasörler
+- **firebase.ts**: Projede Firebase kullanımı için başlangıç noktası (varsa)
 
-## Learn more
+**Önemli Dosyalar**
+- [README.md](README.md): Bu dosya
+- [app/_layout.tsx](app/_layout.tsx): Uygulama düzeni ve router başlangıcı
 
-To learn more about developing your project with Expo, look at the following resources:
+**Çalışma İpuçları**
+- Metro/Expo önbellek sorunlarında temiz başlatmak için:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo start -c
+```
+- Android cihaz veya emülatöre yüklemek için bağlı cihazı kullanın veya Android Studio'da emülatör başlatın.
 
-## Join the community
+**Katkıda Bulunma**
+- Hatalar veya geliştirme önerileri için pull request açabilirsiniz. Küçük bir katkı rehberi yoksa önce issue açın.
 
-Join our community of developers creating universal apps.
+**Lisans**
+- Proje kökünde bir `LICENSE` dosyası yoksa, kullanmak istediğiniz lisansı ekleyin.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Sorularınız veya README'de değişiklik isteğiniz olursa bildirin — güncelleyeyim.
