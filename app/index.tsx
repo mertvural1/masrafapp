@@ -2,15 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Button, Card, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ROOM_CACHE_KEY, ROOM_PREFIX } from "../constants/room";
 import { auth } from "./firebase";
@@ -66,7 +59,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color="#3366ff" />
           <Text style={styles.loadingText}>Giriş kontrol ediliyor...</Text>
         </View>
       </SafeAreaView>
@@ -75,46 +68,51 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerCard}>
-        <Text style={styles.eyebrow}>Smart Expense</Text>
-        <Text style={styles.title}>Ortak giderlerin merkezi</Text>
-        <Text style={styles.info}>
-          Yeni oda oluşturup arkadaşlarınla paylaş, ortak masrafları takip et.
-        </Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Hızlı başlangıç</Text>
-        <Text style={styles.cardText}>Yeni bir oda oluşturup ortak bir liste başlat.</Text>
-        <View style={styles.buttonRow}>
-          <Button title="Yeni Oda Oluştur" onPress={handleNewRoom} />
-        </View>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Var olan odaya gir</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Oda anahtarını girin"
-          value={roomKeyInput}
-          onChangeText={setRoomKeyInput}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <Button title="Odaya Gir" onPress={handleDefaultRoom} />
-      </View>
-
-      {storedRoomKey ? (
-        <View style={styles.noteBox}>
-          <Text style={styles.noteTitle}>Kaydedilmiş Anahtar</Text>
-          <Text style={styles.noteText}>{storedRoomKey}</Text>
-          <Text style={styles.noteText}>
-            Bu anahtarı arkadaşlarına ver, aynı anahtarı giren herkes aynı listeyi görsün.
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.heroSection}>
+          <Text style={styles.eyebrow}>Masraf Uygulaması</Text>
+          <Text style={styles.title}>Ortak harcamaları sade ve keyifli yönetin.</Text>
+          <Text style={styles.subtitle}>
+            Yeni oda oluşturun, anahtar paylaşın ve herkesin masrafları tek yerde takip etmesini sağlayın.
           </Text>
+          <Button mode="contained" uppercase={false} onPress={handleNewRoom} style={styles.button}>
+            Yeni Oda Oluştur
+          </Button>
         </View>
-      ) : null}
 
-      <Text style={styles.beta}>E-posta/parola ile giriş yaptıktan sonra tüm özellikler aktif olur.</Text>
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.sectionTitle}>Odaya Gir</Text>
+            <Text style={styles.sectionSubtitle}>Mevcut oda anahtarınızı girin.</Text>
+            <TextInput
+              mode="outlined"
+              style={styles.input}
+              placeholder="Oda anahtarını girin"
+              value={roomKeyInput}
+              onChangeText={setRoomKeyInput}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <Button mode="contained" uppercase={false} onPress={handleDefaultRoom} style={styles.button}>
+              Odaya Gir
+            </Button>
+          </Card.Content>
+        </Card>
+
+        {storedRoomKey ? (
+          <Card style={[styles.card, styles.noteCard]}>
+            <Card.Content>
+              <Text style={styles.noteTitle}>Kaydedilmiş Anahtar</Text>
+              <Text style={styles.noteText}>{storedRoomKey}</Text>
+              <Text style={styles.noteText}>
+                Bu anahtarı arkadaşlarına ver, aynı anahtarı giren herkes aynı listeyi görsün.
+              </Text>
+            </Card.Content>
+          </Card>
+        ) : null}
+
+        <Text style={styles.beta}>E-posta/parola ile giriş yaptıktan sonra tüm özellikler aktif olur.</Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -122,88 +120,85 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f4f7fb",
+    backgroundColor: "#eef4ff",
   },
-  headerCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 24,
+  scrollContent: {
     padding: 20,
-    marginBottom: 18,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 14,
-    elevation: 4,
+    paddingBottom: 32,
+  },
+  heroSection: {
+    borderRadius: 28,
+    backgroundColor: "#fff",
+    padding: 24,
+    marginBottom: 20,
+    shadowColor: "#1f2937",
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 8,
   },
   eyebrow: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#2563eb",
-    letterSpacing: 2,
+    color: "#3366ff",
+    letterSpacing: 1.6,
     textTransform: "uppercase",
-    marginBottom: 8,
+    marginBottom: 14,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "800",
-    marginBottom: 8,
-    color: "#111827",
+    lineHeight: 36,
+    color: "#0f172a",
+    marginBottom: 12,
   },
-  info: {
-    fontSize: 15,
-    color: "#6b7280",
-    lineHeight: 22,
+  subtitle: {
+    color: "#475569",
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 20,
   },
   card: {
     marginBottom: 18,
-    padding: 16,
-    borderRadius: 18,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 6,
-    color: "#111827",
-  },
-  cardText: {
-    color: "#6b7280",
-    marginBottom: 12,
-  },
-  buttonRow: {
-    marginTop: 4,
+    borderRadius: 22,
+    overflow: "hidden",
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: "#f9fafb",
+    marginBottom: 16,
   },
-  noteBox: {
-    marginTop: 10,
-    padding: 14,
-    borderRadius: 16,
-    backgroundColor: "#e8f0ff",
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0f172a",
+    marginBottom: 6,
+  },
+  sectionSubtitle: {
+    color: "#64748b",
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  button: {
+    marginTop: 12,
+  },
+  noteCard: {
+    backgroundColor: "#eff6ff",
   },
   noteTitle: {
     fontWeight: "700",
-    marginBottom: 6,
-    color: "#1e3a8a",
+    fontSize: 16,
+    color: "#1d4ed8",
+    marginBottom: 10,
   },
   noteText: {
-    color: "#334155",
+    color: "#475569",
     lineHeight: 20,
+    marginBottom: 6,
   },
   beta: {
-    marginTop: 24,
-    color: "#6b7280",
+    marginTop: 12,
+    color: "#64748b",
     fontSize: 13,
+    textAlign: "center",
   },
   loadingBox: {
     flex: 1,
@@ -212,6 +207,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    color: "#4b5563",
+    color: "#475569",
+    fontSize: 15,
   },
 });

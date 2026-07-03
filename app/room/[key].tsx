@@ -3,15 +3,13 @@ import { child, onValue, ref, remove, set } from "firebase/database";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
-  Button,
   FlatList,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
-  TextInput,
-  View
+  View,
 } from "react-native";
+import { Button, Card, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { EXPENSES_PATH_SUFFIX, FIREBASE_ROOM_PATH } from "../../constants/room";
 import type { ExpenseItem } from "../../types/expense";
@@ -34,60 +32,60 @@ const HeaderContent = memo(function HeaderContent({
   return (
     <>
       <View style={styles.header}>
-        <Text style={styles.title}>Oda: {roomKey}</Text>
-        <Text style={styles.subtitle}>
+        <Text style={styles.pageTitle}>Oda</Text>
+        <Text style={styles.pageSubtitle}>
           Bu anahtarı alan herkes aynı masraf listesini görür.
         </Text>
       </View>
 
-      <View style={styles.formCard}>
-        <Text style={styles.label}>Masrafı Yapan</Text>
-        <TextInput
-          value={name}
-          onChangeText={onNameChange}
-          placeholder="Mert, Ali, Veli"
-          style={styles.input}
-          returnKeyType="next"
-          blurOnSubmit={false}
-        />
+      <Card style={styles.formCard}>
+        <Card.Content>
+          <Text style={styles.label}>Masrafı Yapan</Text>
+          <TextInput
+            mode="outlined"
+            style={styles.input}
+            value={name}
+            onChangeText={onNameChange}
+            placeholder="Mert, Ali, Veli"
+            returnKeyType="next"
+            blurOnSubmit={false}
+          />
 
-        <Text style={styles.label}>Masraf Adı</Text>
-        <TextInput
-          value={description}
-          onChangeText={onDescriptionChange}
-          placeholder="Elektrik faturası"
-          style={styles.input}
-          returnKeyType="next"
-          blurOnSubmit={false}
-        />
+          <Text style={styles.label}>Masraf Adı</Text>
+          <TextInput
+            mode="outlined"
+            style={styles.input}
+            value={description}
+            onChangeText={onDescriptionChange}
+            placeholder="Elektrik faturası"
+            returnKeyType="next"
+            blurOnSubmit={false}
+          />
 
-        <Text style={styles.label}>Tutar (TL)</Text>
-        <TextInput
-          value={amount}
-          onChangeText={onAmountChange}
-          placeholder="500"
-          keyboardType="numeric"
-          style={styles.input}
-          returnKeyType="done"
-          onSubmitEditing={onAddExpense}
-        />
+          <Text style={styles.label}>Tutar (TL)</Text>
+          <TextInput
+            mode="outlined"
+            style={styles.input}
+            value={amount}
+            onChangeText={onAmountChange}
+            placeholder="500"
+            keyboardType="numeric"
+            returnKeyType="done"
+            onSubmitEditing={onAddExpense}
+          />
 
-        <Button title="Masraf Ekle" onPress={onAddExpense} />
-      </View>
+          <Button mode="contained" uppercase={false} onPress={onAddExpense} style={styles.button}>
+            Masraf Ekle
+          </Button>
+        </Card.Content>
+      </Card>
 
-      <View style={styles.summaryCard}>
-        <Text style={styles.sectionTitle}>Toplam</Text>
-        <Text style={styles.totalText}>{total.toFixed(2)} TL</Text>
-      </View>
-
-      <View style={styles.listCard}>
-        <Text style={styles.sectionTitle}>Masraflar</Text>
-        {loading ? (
-          <Text>Yükleniyor...</Text>
-        ) : expenseCount === 0 ? (
-          <Text>Henüz masraf yok.</Text>
-        ) : null}
-      </View>
+      <Card style={styles.summaryCard}>
+        <Card.Content>
+          <Text style={styles.sectionTitle}>Toplam</Text>
+          <Text style={styles.totalText}>{total.toFixed(2)} TL</Text>
+        </Card.Content>
+      </Card>
     </>
   );
 });
@@ -115,9 +113,7 @@ export default function RoomScreen() {
         ...(item as Omit<ExpenseItem, "id">),
       }));
 
-      setExpenses(
-        items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
-      );
+      setExpenses(items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)));
       setLoading(false);
     });
 
@@ -180,8 +176,14 @@ export default function RoomScreen() {
   if (!key) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.title}>Geçersiz oda anahtarı.</Text>
-        <Button title="Geri dön" onPress={() => router.push("/")} />
+        <Card style={styles.emptyCard}>
+          <Card.Content>
+            <Text style={styles.pageTitle}>Geçersiz oda anahtarı.</Text>
+            <Button mode="outlined" uppercase={false} textColor="#0f172a" onPress={() => router.push("/")} style={styles.button}>
+              Ana Sayfaya Dön
+            </Button>
+          </Card.Content>
+        </Card>
       </SafeAreaView>
     );
   }
@@ -215,24 +217,39 @@ export default function RoomScreen() {
           ListHeaderComponent={headerComponent}
           ListFooterComponent={
             <View style={styles.actions}>
-              <Button title="Odayı Temizle" color="#d9534f" onPress={clearRoom} />
-              <View style={styles.backButton}>
-                <Button title="Ana Sayfaya Dön" onPress={() => router.push("/")} />
-              </View>
+              <Button
+                mode="contained"
+                uppercase={false}
+                buttonColor="#ef4444"
+                textColor="#fff"
+                onPress={clearRoom}
+                style={styles.button}
+              >
+                Odayı Temizle
+              </Button>
+              <Button
+                mode="outlined"
+                uppercase={false}
+                textColor="#0f172a"
+                onPress={() => router.push("/")}
+                style={[styles.button, styles.secondaryButton]}
+              >
+                Ana Sayfaya Dön
+              </Button>
             </View>
           }
           renderItem={({ item }) => (
-            <View style={styles.expenseItem}>
+            <Card style={styles.expenseItem}>
               <View style={styles.expenseRow}>
                 <Text style={styles.expenseName}>{item.description}</Text>
                 <Text style={styles.expenseAmount}>{item.amount.toFixed(2)} TL</Text>
               </View>
               <Text style={styles.expenseMeta}>{item.name}</Text>
-            </View>
+            </Card>
           )}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
-          ListEmptyComponent={!loading ? <Text>Henüz masraf yok.</Text> : null}
+          ListEmptyComponent={!loading ? <Text style={styles.emptyText}>Henüz masraf yok.</Text> : null}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -242,7 +259,7 @@ export default function RoomScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f7f7f7",
+    backgroundColor: "#eef4ff",
   },
   keyboardAvoiding: {
     flex: 1,
@@ -254,79 +271,89 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 18,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#0f172a",
     marginBottom: 8,
   },
-  subtitle: {
-    color: "#555",
+  pageSubtitle: {
+    color: "#475569",
     fontSize: 15,
     lineHeight: 22,
   },
   formCard: {
-    padding: 16,
-    borderRadius: 14,
-    backgroundColor: "#fff",
     marginBottom: 18,
   },
-  label: {
-    marginBottom: 6,
-    fontWeight: "600",
-  },
   input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 14,
-    backgroundColor: "#fafafa",
+    marginBottom: 16,
+  },
+  button: {
+    marginTop: 16,
+  },
+  label: {
+    marginBottom: 8,
+    fontWeight: "700",
+    color: "#334155",
   },
   summaryCard: {
-    padding: 16,
-    borderRadius: 14,
-    backgroundColor: "#fff",
+    marginBottom: 18,
+  },
+  messageCard: {
     marginBottom: 18,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    marginBottom: 10,
+    color: "#0f172a",
+    marginBottom: 8,
   },
   totalText: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "800",
+    color: "#334155",
   },
-  listCard: {
-    padding: 16,
-    borderRadius: 14,
-    backgroundColor: "#fff",
-    marginBottom: 18,
+  messageText: {
+    color: "#64748b",
+    fontSize: 15,
   },
   expenseItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    paddingVertical: 12,
+    marginBottom: 14,
+    padding: 18,
   },
   expenseRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 8,
   },
   expenseName: {
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0f172a",
   },
   expenseAmount: {
+    fontSize: 16,
     fontWeight: "700",
+    color: "#3366ff",
   },
   expenseMeta: {
-    color: "#666",
-    fontSize: 13,
+    color: "#64748b",
+    fontSize: 14,
   },
   actions: {
-    marginTop: 4,
+    marginTop: 20,
+    gap: 12,
   },
-  backButton: {
+  secondaryButton: {
     marginTop: 12,
+  },
+  emptyText: {
+    color: "#475569",
+    textAlign: "center",
+    marginTop: 16,
+  },
+  emptyCard: {
+    margin: 20,
+    padding: 22,
   },
 });

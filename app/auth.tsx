@@ -1,19 +1,12 @@
-import { useRouter } from "expo-router";
+﻿import { useRouter } from "expo-router";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Button, Card, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "./firebase";
 
@@ -75,51 +68,67 @@ export default function AuthScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color="#3366ff" />
       </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.heroCard}>
-        <Text style={styles.eyebrow}>Smart Expense</Text>
-        <Text style={styles.title}>Masraflarınızı kontrol edin</Text>
-        <Text style={styles.subtitle}>
-          E-posta ve şifre ile giriş yapın, odalar oluşturun ve ortak masrafları yönetin.
-        </Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Card style={styles.heroCard}>
+          <Card.Content>
+            <Text style={styles.eyebrow}>Smart Expense</Text>
+            <Text style={styles.title}>Masraflarınızı kolayca yönetin</Text>
+            <Text style={styles.subtitle}>
+              Hemen giriş yapın veya kayıt olun, odalar açın ve ortak harcamaları düzenli bir şekilde takip edin.
+            </Text>
 
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="E-posta"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-        />
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Şifre"
-          secureTextEntry
-          autoCapitalize="none"
-          autoComplete="password"
-        />
+            <TextInput
+              mode="outlined"
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="E-posta"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+            />
+            <TextInput
+              mode="outlined"
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Şifre"
+              secureTextEntry
+              autoCapitalize="none"
+              autoComplete="password"
+            />
 
-        <Pressable style={styles.primaryButton} onPress={handleAuth} disabled={authenticating}>
-          <Text style={styles.primaryButtonText}>
-            {authenticating ? "İşleniyor..." : isRegistering ? "Kayıt Ol" : "Giriş Yap"}
-          </Text>
-        </Pressable>
+            <Button
+              mode="contained"
+              uppercase={false}
+              loading={authenticating}
+              onPress={handleAuth}
+              disabled={authenticating}
+              style={styles.primaryButton}
+            >
+              {authenticating ? "İşleniyor..." : isRegistering ? "Kayıt Ol" : "Giriş Yap"}
+            </Button>
 
-        <Pressable style={styles.linkButton} onPress={() => setIsRegistering((prev) => !prev)} disabled={authenticating}>
-          <Text style={styles.linkButtonText}>
-            {isRegistering ? "Zaten hesabınız var? Giriş yap" : "Hesabınız yok mu? Kayıt olun"}
-          </Text>
-        </Pressable>
-      </View>
+            <Button
+              mode="outlined"
+              uppercase={false}
+              onPress={() => setIsRegistering((prev) => !prev)}
+              disabled={authenticating}
+              style={styles.linkButton}
+              textColor="#3366ff"
+            >
+              {isRegistering ? "Zaten hesabınız var? Giriş yap" : "Hesabınız yok mu? Kayıt olun"}
+            </Button>
+          </Card.Content>
+        </Card>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -127,72 +136,58 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: "#eef4ff",
+  },
+  content: {
     padding: 24,
-    backgroundColor: "#f4f7fb",
+    paddingBottom: 32,
   },
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f4f7fb",
+    backgroundColor: "#eef4ff",
   },
   heroCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 24,
+    backgroundColor: "#fff",
+    borderRadius: 30,
     padding: 28,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    elevation: 8,
+    shadowColor: "#1f2937",
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.12,
+    shadowRadius: 25,
+    elevation: 10,
+  },
+  input: {
+    marginBottom: 16,
   },
   eyebrow: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#2563eb",
-    letterSpacing: 2,
+    color: "#3366ff",
+    letterSpacing: 1.5,
     textTransform: "uppercase",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: "800",
-    color: "#111827",
-    marginBottom: 12,
+    color: "#0f172a",
+    marginBottom: 14,
+    lineHeight: 40,
   },
   subtitle: {
     fontSize: 15,
-    lineHeight: 22,
-    color: "#6b7280",
+    color: "#64748b",
+    lineHeight: 24,
     marginBottom: 24,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 12,
-    backgroundColor: "#f9fafb",
-  },
   primaryButton: {
-    backgroundColor: "#2563eb",
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 16,
+    marginTop: 8,
   },
   linkButton: {
-    alignItems: "center",
+    borderRadius: 20,
     paddingVertical: 12,
-  },
-  linkButtonText: {
-    color: "#2563eb",
-    fontWeight: "600",
+    marginTop: 12,
   },
 });
