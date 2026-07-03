@@ -1,25 +1,29 @@
-import * as AuthSession from "expo-auth-session";
-import { makeRedirectUri } from "expo-auth-session";
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
-import { signOut as firebaseSignOut, GoogleAuthProvider, onAuthStateChanged, signInWithCredential } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import { GOOGLE_CLIENT_ID } from "../constants/auth";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "./firebase";
-
-WebBrowser.maybeCompleteAuthSession();
-
-const discovery = {
-  authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenEndpoint: "https://oauth2.googleapis.com/token",
-  revocationEndpoint: "https://oauth2.googleapis.com/revoke",
-};
 
 export default function AuthScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [authenticating, setAuthenticating] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -32,47 +36,40 @@ export default function AuthScreen() {
     return () => unsubscribe();
   }, [router]);
 
-  const signInWithGoogle = async () => {
-    try {
-      setAuthenticating(true);
-      const redirectUri = makeRedirectUri({ useProxy: true } as any);
-      const request = new AuthSession.AuthRequest({
-        clientId: GOOGLE_CLIENT_ID,
-        redirectUri,
-        responseType: AuthSession.ResponseType.Code,
-        scopes: ["openid", "profile", "email"],
-        usePKCE: true,
-      });
+  const handleAuth = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert("Eksik bilgi", "Lütfen e-posta ve şifre girin.");
+      return;
+    }
 
-      const result = await request.promptAsync(discovery);
-      if (result.type !== "success") {
-        throw new Error("Google login cancelled");
+    setAuthenticating(true);
+
+    try {
+      if (isRegistering) {
+        await createUserWithEmailAndPassword(auth, email.trim(), password);
+      } else {
+        await signInWithEmailAndPassword(auth, email.trim(), password);
+      }
+    } catch (error) {
+      const code = (error as any)?.code;
+      let message = "İşlem gerçekleştirilemedi. Lütfen bilgilerinizi kontrol edin.";
+
+      if (code === "auth/user-not-found") {
+        message = "Kullanıcı bulunamadı. Lütfen önce kayıt olun.";
+      } else if (code === "auth/wrong-password") {
+        message = "Geçersiz şifre.";
+      } else if (code === "auth/invalid-email") {
+        message = "Geçersiz e-posta adresi.";
+      } else if (code === "auth/email-already-in-use") {
+        message = "Bu e-posta zaten kayıtlı.";
+      } else if (code === "auth/weak-password") {
+        message = "Şifre en az 6 karakter olmalıdır.";
       }
 
-      const { code } = result.params;
-      const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          code,
-          client_id: GOOGLE_CLIENT_ID,
-          redirect_uri: redirectUri,
-          grant_type: "authorization_code",
-        }).toString(),
-      });
-
-      const tokenJson = await tokenResponse.json();
-      const credential = GoogleAuthProvider.credential(tokenJson.id_token, tokenJson.access_token);
-      await signInWithCredential(auth, credential);
-    } catch (error) {
-      Alert.alert("Giriş başarısız", "Google ile giriş yapılamadı.");
+      Alert.alert("Hata", message);
     } finally {
       setAuthenticating(false);
     }
-  };
-
-  const signOut = async () => {
-    await firebaseSignOut(auth);
   };
 
   if (loading) {
@@ -84,25 +81,46 @@ export default function AuthScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.heroCard}>
         <Text style={styles.eyebrow}>Smart Expense</Text>
         <Text style={styles.title}>Masraflarınızı kontrol edin</Text>
         <Text style={styles.subtitle}>
-          Google hesabınızla giriş yapın, odalar oluşturun ve ortak masrafları yönetin.
+          E-posta ve şifre ile giriş yapın, odalar oluşturun ve ortak masrafları yönetin.
         </Text>
 
-        <Pressable style={styles.primaryButton} onPress={signInWithGoogle} disabled={authenticating}>
-          <Text style={styles.primaryButtonText}>{authenticating ? "Giriş yapılıyor..." : "Google ile devam et"}</Text>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          placeholder="E-posta"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+        />
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Şifre"
+          secureTextEntry
+          autoCapitalize="none"
+          autoComplete="password"
+        />
+
+        <Pressable style={styles.primaryButton} onPress={handleAuth} disabled={authenticating}>
+          <Text style={styles.primaryButtonText}>
+            {authenticating ? "İşleniyor..." : isRegistering ? "Kayıt Ol" : "Giriş Yap"}
+          </Text>
         </Pressable>
 
-        {auth.currentUser ? (
-          <Pressable style={styles.secondaryButton} onPress={signOut}>
-            <Text style={styles.secondaryButtonText}>Çıkış yap</Text>
-          </Pressable>
-        ) : null}
+        <Pressable style={styles.linkButton} onPress={() => setIsRegistering((prev) => !prev)} disabled={authenticating}>
+          <Text style={styles.linkButtonText}>
+            {isRegistering ? "Zaten hesabınız var? Giriş yap" : "Hesabınız yok mu? Kayıt olun"}
+          </Text>
+        </Pressable>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -148,6 +166,15 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     marginBottom: 24,
   },
+  input: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 12,
+    backgroundColor: "#f9fafb",
+  },
   primaryButton: {
     backgroundColor: "#2563eb",
     borderRadius: 14,
@@ -160,15 +187,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 16,
   },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 14,
-    paddingVertical: 12,
+  linkButton: {
     alignItems: "center",
+    paddingVertical: 12,
   },
-  secondaryButtonText: {
-    color: "#374151",
+  linkButtonText: {
+    color: "#2563eb",
     fontWeight: "600",
   },
 });

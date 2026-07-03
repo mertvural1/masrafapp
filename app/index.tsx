@@ -6,12 +6,12 @@ import {
   ActivityIndicator,
   Alert,
   Button,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ROOM_CACHE_KEY, ROOM_PREFIX } from "../constants/room";
 import { auth } from "./firebase";
 
@@ -114,7 +114,7 @@ export default function HomeScreen() {
         </View>
       ) : null}
 
-      <Text style={styles.beta}>Google giriş sonrası tüm özellikler aktif olur.</Text>
+      <Text style={styles.beta}>E-posta/parola ile giriş yaptıktan sonra tüm özellikler aktif olur.</Text>
     </SafeAreaView>
   );
 }

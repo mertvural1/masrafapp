@@ -7,12 +7,12 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   View
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { EXPENSES_PATH_SUFFIX, FIREBASE_ROOM_PATH } from "../../constants/room";
 import type { ExpenseItem } from "../../types/expense";
 import type { HeaderContentProps } from "../../types/header";
